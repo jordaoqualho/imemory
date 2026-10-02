@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <title>Como funciona · iMemory</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%231d1d1f'/%3E%3Cpath d='M10 28V12h5l5 9 5-9h5v16h-5V20l-5 8-5-8v8' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="refine.css">
+  <link rel="stylesheet" href="components.css">
+  <script src="motion.js" defer></script>
+  <script src="guide.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#content">Ir para o conteúdo</a>
+  <header class="global-nav">
+    <div class="nav-inner">
+      <a class="brand" href="./" aria-label="iMemory, início"><span class="logo">m</span><span>iMemory</span></a>
+      <nav aria-label="Navegação principal" class="primary-nav">
+        <a href="./">Visão geral</a>
+        <a href="./#pages">Memórias</a>
+        <a href="./#sessions">Sessões</a>
+        <a href="./#handoffs">Handoffs</a>
+        <a href="./#cleanup">Limpeza</a>
+        <a href="guide.html" class="active" aria-current="page">Como funciona</a>
+      </nav>
+      <div class="nav-status"><span class="connection online">Memória local</span></div>
+    </div>
+  </header>
+
+  <main id="content" tabindex="-1">
+    <section class="hero-band">
+      <div class="hero">
+        <div class="eyebrow">Como funciona</div>
+        <h1>Memória local para seus agentes.</h1>
+        <p>Hooks capturam cada sessão, um servidor local guarda e resume, e as IAs consultam tudo via MCP. Os dados ficam neste Mac; só o resumo passa pelo LLM que você configurou.</p>
+      </div>
+    </section>
+
+    <section class="content-band doc">
+      <div class="shell">
+
+        <section class="doc-section" aria-labelledby="flow-title">
+          <div class="section-title"><h2 id="flow-title">O ciclo de uma sessão.</h2><span>Do prompt à próxima conversa</span></div>
+          <ol class="flow">
+            <li class="g-card flow-step">
+              <span class="step-no">1</span>
+              <h3>Captura</h3>
+              <p>Hooks de ciclo de vida enviam cada evento para <code>POST /hook</code>. Se o servidor estiver fora do ar, o evento espera em <code>hook-spool/</code>.</p>
+              <div class="tags"><code>SessionStart</code><code>UserPromptSubmit</code><code>PostToolUse</code><code>PreCompact</code><code>SessionEnd</code></div>
+            </li>
+            <li class="g-card flow-step">
+              <span class="step-no">2</span>
+              <h3>Armazena</h3>
+              <p>Sessões e observações vão para o SQLite com busca FTS5. Páginas são Markdown em <code>wiki/</code>, versionadas com git a cada escrita.</p>
+              <div class="tags"><code>db/memory.sqlite</code><code>wiki/</code><code>all-MiniLM-L6-v2</code></div>
+            </li>
+            <li class="g-card flow-step">
+              <span class="step-no">3</span>
+              <h3>Consolida</h3>
+              <p>No <code>PreCompact</code> ou pelo botão <strong>Salvar sessão</strong>, o LLM resume os eventos em <code>sessions/&lt;id&gt;.md</code>. Uma faxina diária arquiva o que esfriou.</p>
+              <div class="tags"><code>LLM configurado</code><code>memory_consolidate</code></div>
+            </li>
+            <li class="g-card flow-step">
+              <span class="step-no">4</span>
+              <h3>Entrega</h3>
+              <p>Na próxima sessão, o <code>SessionStart</code> injeta o handoff pendente. Durante o trabalho, a IA consulta a memória pelas ferramentas MCP.</p>
+              <div class="tags"><code>127.0.0.1:49374/mcp</code><code>memory_query</code></div>
+            </li>
+          </ol>
+        </section>
+
+        <section class="doc-section" aria-labelledby="prompts-title">
+          <div class="section-title"><h2 id="prompts-title">Peça em linguagem natural.</h2><span>A IA escolhe a ferramenta MCP</span></div>
+          <div class="g-card phrases">
+            <div class="phrase"><q>Onde paramos?</q><code>memory_handoff_accept</code><span>Recupera o handoff deixado pela última sessão.</span></div>
+            <div class="phrase"><q>Salve um handoff para a próxima IA.</q><code>memory_handoff_begin</code><span>Resumo, próximos passos e questões em aberto.</span></div>
+            <div class="phrase"><q>Lembre que usamos pnpm neste projeto.</q><code>memory_write_page</code><span>Cria uma página permanente. Diga “para todos os projetos” para torná-la global.</span></div>
+            <div class="phrase"><q>Já discutimos o cache do deploy?</q><code>memory_query</code><span>Busca no projeto atual; peça “em todos os projetos” para ampliar.</span></div>
+            <div class="phrase"><q>Resuma esta sessão na memória.</q><code>memory_consolidate</code><span>O mesmo que o botão Salvar sessão do portal.</span></div>
+            <div class="phrase"><q>Essa página está desatualizada.</q><code>memory_feedback</code><span>Reduz o peso da página e a marca para revisão.</span></div>
+          </div>
+        </section>
+
+        <section class="doc-section" aria-labelledby="cli-title">
+          <div class="section-title"><h2 id="cli-title">Terminal.</h2><span>A interface entra por <code>AI_MEMORY_WEB_UI_DIR</code></span></div>
+          <div class="terminal">
+            <div class="cmd head"><code>export AI_MEMORY_WEB_UI_DIR="$(pwd)/web-ui"</code><span>Aponta o servidor para esta interface</span><button type="button" class="copy">Copiar</button></div>
+            <div class="cmd"><code>ai-memory status</code><span>Versão, contagens, tamanho em disco</span><button type="button" class="copy">Copiar</button></div>
+            <div class="cmd"><code>ai-memory doctor</code><span>Confere se cada harness está sendo capturado neste repositório</span><button type="button" class="copy">Copiar</button></div>
+            <div class="cmd"><code>ai-memory search "deploy"</code><span>Busca FTS5 nas páginas</span><button type="button" class="copy">Copiar</button></div>
+            <div class="cmd"><code>ai-memory handoffs</code><span>Lista handoffs abertos para cancelar por id</span><button type="button" class="copy">Copiar</button></div>
+            <div class="cmd"><code>ai-memory finalize-session</code><span>Encerra a sessão aberta mais recente do agente</span><button type="button" class="copy">Copiar</button></div>
+            <div class="cmd"><code>ai-memory forget-sweep --dry-run</code><span>Prévia da faxina de retenção</span><button type="button" class="copy">Copiar</button></div>
+            <div class="cmd"><code>ai-memory checkpoints</code><span>Checkpoints git da wiki, para recuperar páginas</span><button type="button" class="copy">Copiar</button></div>
+            <div class="cmd"><code>ai-memory restore-page --path notes/x.md --from &lt;rev&gt;</code><span>Restaura uma página excluída</span><button type="button" class="copy">Copiar</button></div>
+            <div class="cmd"><code>ai-memory backup</code><span>Snapshot de wiki, banco e config em .tar.gz</span><button type="button" class="copy">Copiar</button></div>
+            <div class="cmd"><code>launchctl kickstart -k gui/$(id -u)/com.github.akitaonrails.ai-memory</code><span>Reinicia o servidor (necessário após editar o index.html do portal)</span><button type="button" class="copy">Copiar</button></div>
+          </div>
+        </section>
+
+        <section class="doc-section split" aria-labelledby="data-title">
+          <div>
+            <div class="section-title"><h2 id="data-title">Onde fica cada coisa.</h2></div>
+            <dl class="g-card paths">
+              <div><dt><code>db/memory.sqlite</code></dt><dd>Sessões, observações, índice FTS5 e embeddings.</dd></div>
+              <div><dt><code>wiki/</code></dt><dd>Páginas em Markdown, uma pasta por projeto, com histórico git.</dd></div>
+              <div><dt><code>hook-spool/</code></dt><dd>Eventos aguardando entrega quando o servidor está fora.</dd></div>
+              <div><dt><code>config.toml</code></dt><dd>Retenção, redação de segredos, limites do LLM.</dd></div>
+              <div><dt><code>logs/</code></dt><dd>Log do servidor e do launchd.</dd></div>
+              <div><dt><code>backups/</code></dt><dd>Snapshots e cópias anteriores do portal.</dd></div>
+            </dl>
+          </div>
+          <div>
+            <div class="section-title"><h2>Projetos.</h2></div>
+            <div class="g-card note">
+              <p>O projeto vem do nome da pasta em que a IA está trabalhando. Para fixar nomes, crie um marcador na raiz do repositório:</p>
+              <pre><code>.ai-memory.toml
+workspace = "default"
+project   = "meu-app"</code></pre>
+              <p>Memórias de um projeto não aparecem em outro, a menos que você peça uma busca global.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="doc-section" aria-labelledby="int-title">
+          <div class="section-title"><h2 id="int-title">Suas integrações.</h2><span>Todas apontam para o mesmo servidor local</span></div>
+          <div class="integrations">
+            <article class="g-card integration">
+              <header><h3>Claude Code</h3><span class="badge auto">Automática</span></header>
+              <ul><li><b>Captura</b>Hooks de ciclo de vida</li><li><b>Consulta</b>MCP</li></ul>
+              <code class="config">~/.claude/settings.json</code>
+            </article>
+            <article class="g-card integration">
+              <header><h3>Cursor</h3><span class="badge auto">Automática</span></header>
+              <ul><li><b>Captura</b>Hooks de ciclo de vida</li><li><b>Consulta</b>MCP</li></ul>
+              <code class="config">~/.cursor/hooks.json</code>
+            </article>
+            <article class="g-card integration">
+              <header><h3>Codex</h3><span class="badge auto">Automática</span></header>
+              <ul><li><b>Captura</b>Hooks de ciclo de vida</li><li><b>Consulta</b>MCP</li></ul>
+              <code class="config">~/.codex/hooks.json</code>
+            </article>
+            <article class="g-card integration">
+              <header><h3>Claude Desktop</h3><span class="badge manual">Sob pedido</span></header>
+              <ul><li><b>Captura</b>Sem hooks</li><li><b>Consulta</b>MCP</li></ul>
+              <code class="config">claude_desktop_config.json</code>
+            </article>
+          </div>
+        </section>
+
+        <section class="doc-section faq-section" aria-labelledby="faq-title">
+          <div class="faq-intro">
+            <h2 id="faq-title">Perguntas de dev.</h2>
+            <p>O que costuma surgir quando a memória dos agentes passa a morar num servidor local.</p>
+            <button type="button" class="pill-button" id="faq-toggle" aria-pressed="false">Expandir todas</button>
+          </div>
+          <div class="faq-list">
+            <details class="faq-item"><summary><span class="faq-no">01</span><span class="faq-q">O que sai deste Mac?</span><span class="faq-icon" aria-hidden="true"></span></summary><div class="faq-a"><p>Só o texto enviado ao LLM que você configurou, quando uma sessão é consolidada ou revisada pelo auto-improve agendado.</p><p>Captura, busca FTS5, embeddings e o portal rodam localmente em <code>127.0.0.1:49374</code>.</p></div></details>
+            <details class="faq-item"><summary><span class="faq-no">02</span><span class="faq-q">Segredos vão parar na memória?</span><span class="faq-icon" aria-hidden="true"></span></summary><div class="faq-a"><p>Os eventos passam por redação antes de gravar: tokens Bearer, chaves <code>sk-</code>, <code>ghp_</code>, <code>AKIA</code>, <code>AIza</code>, tokens do Slack, JWTs e chaves PEM.</p><p>Padrões próprios podem ser adicionados na seção de redação do <code>config.toml</code>.</p></div></details>
+            <details class="faq-item"><summary><span class="faq-no">03</span><span class="faq-q">Ele lê meus arquivos?</span><span class="faq-icon" aria-hidden="true"></span></summary><div class="faq-a"><p>Não. Recebe apenas os eventos da conversa e das ferramentas que a IA executa: prompts, chamadas de ferramenta e seus resultados resumidos.</p><p>Não monitora o editor, o sistema de arquivos nem o que você digita fora da IA.</p></div></details>
+            <details class="faq-item"><summary><span class="faq-no">04</span><span class="faq-q">Quando uma sessão vira memória?</span><span class="faq-icon" aria-hidden="true"></span></summary><div class="faq-a"><p>Em três momentos: no <code>PreCompact</code>, quando o agente compacta o contexto; pelo botão <strong>Salvar sessão</strong> do portal; ou quando você pede “resuma esta sessão na memória”.</p><p>No fim da sessão, o hook deixa um handoff automático para a próxima IA. A consolidação no <code>SessionEnd</code> só roda com <code>AI_MEMORY_CONSOLIDATE_ON_SESSION_END</code> ligado.</p></div></details>
+            <details class="faq-item"><summary><span class="faq-no">05</span><span class="faq-q">O servidor caiu. Perdi eventos?</span><span class="faq-icon" aria-hidden="true"></span></summary><div class="faq-a"><p>Não, se ele voltar a tempo. Os hooks gravam cada evento em <code>hook-spool/</code> e reenviam quando o servidor responde.</p><p>Eventos parados por mais de 7 dias são descartados na drenagem.</p></div></details>
+            <details class="faq-item"><summary><span class="faq-no">06</span><span class="faq-q">Quanto tempo uma memória dura?</span><span class="faq-icon" aria-hidden="true"></span></summary><div class="faq-a"><p>Decisões, regras e notas ficam até você excluir. Uma faxina diária arquiva memórias de sessão pouco consultadas e apaga de vez o que está arquivado há mais de 180 dias (<code>hard_delete_after_days</code>).</p><p>Páginas fixadas não são arquivadas; páginas com <code>expires_at</code> somem na data definida.</p></div></details>
+            <details class="faq-item"><summary><span class="faq-no">07</span><span class="faq-q">Um agente não aparece nas sessões.</span><span class="faq-icon" aria-hidden="true"></span></summary><div class="faq-a"><p>Rode <code>ai-memory doctor</code> dentro do repositório: ele compara as sessões locais de cada harness com o que o servidor recebeu e aponta o hook que falta.</p><p>Para reinstalar, use <code>ai-memory install-hooks --agent &lt;agente&gt; --apply</code>.</p></div></details>
+            <details class="faq-item"><summary><span class="faq-no">08</span><span class="faq-q">Excluí uma memória por engano.</span><span class="faq-icon" aria-hidden="true"></span></summary><div class="faq-a"><p>No portal há 6 segundos para desfazer. Depois disso, toda exclusão deixa um checkpoint git na wiki.</p><p>Liste com <code>ai-memory checkpoints</code> e recupere com <code>ai-memory restore-page --path &lt;caminho&gt; --from &lt;rev&gt;</code>.</p></div></details>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="shell footer-inner"><span>iMemory</span><span>Memória local, compartilhada entre suas IAs.</span><a href="./" class="text-link">Abrir portal →</a></div></footer>
+  <div id="toasts" class="toasts"></div>
+</body>
+</html>
