@@ -23,6 +23,7 @@
         <a href="./#pages">Memórias</a>
         <a href="./#sessions">Sessões</a>
         <a href="./#handoffs">Handoffs</a>
+        <a href="./#review">Revisão</a>
         <a href="./#cleanup">Limpeza</a>
         <a href="guide.html" class="active" aria-current="page">Como funciona</a>
       </nav>
@@ -80,7 +81,8 @@
             <div class="phrase"><q>Lembre que usamos pnpm neste projeto.</q><code>memory_write_page</code><span>Cria uma página permanente. Diga “para todos os projetos” para torná-la global.</span></div>
             <div class="phrase"><q>Já discutimos o cache do deploy?</q><code>memory_query</code><span>Busca no projeto atual; peça “em todos os projetos” para ampliar.</span></div>
             <div class="phrase"><q>Resuma esta sessão na memória.</q><code>memory_consolidate</code><span>O mesmo que o botão Salvar sessão do portal.</span></div>
-            <div class="phrase"><q>Essa página está desatualizada.</q><code>memory_feedback</code><span>Reduz o peso da página e a marca para revisão.</span></div>
+            <div class="phrase"><q>Essa página está desatualizada.</q><code>memory_feedback</code><span>O mesmo que os botões Útil, Desatualizada e Errada na leitura de uma memória.</span></div>
+            <div class="phrase"><q>Revise o que está contraditório.</q><code>memory_lint</code><span>O mesmo que a tela Revisão. A análise não apaga nada.</span></div>
           </div>
         </section>
 
@@ -165,7 +167,8 @@ project   = "meu-app"</code></pre>
             <details class="faq-item"><summary><span class="faq-no">05</span><span class="faq-q">O servidor caiu. Perdi eventos?</span><span class="faq-icon" aria-hidden="true"></span></summary><div class="faq-a"><p>Não, se ele voltar a tempo. Os hooks gravam cada evento em <code>hook-spool/</code> e reenviam quando o servidor responde.</p><p>Eventos parados por mais de 7 dias são descartados na drenagem.</p></div></details>
             <details class="faq-item"><summary><span class="faq-no">06</span><span class="faq-q">Quanto tempo uma memória dura?</span><span class="faq-icon" aria-hidden="true"></span></summary><div class="faq-a"><p>Decisões, regras e notas ficam até você excluir. Uma faxina diária arquiva memórias de sessão pouco consultadas e apaga de vez o que está arquivado há mais de 180 dias (<code>hard_delete_after_days</code>).</p><p>Páginas fixadas não são arquivadas; páginas com <code>expires_at</code> somem na data definida.</p></div></details>
             <details class="faq-item"><summary><span class="faq-no">07</span><span class="faq-q">Um agente não aparece nas sessões.</span><span class="faq-icon" aria-hidden="true"></span></summary><div class="faq-a"><p>Rode <code>ai-memory doctor</code> dentro do repositório: ele compara as sessões locais de cada harness com o que o servidor recebeu e aponta o hook que falta.</p><p>Para reinstalar, use <code>ai-memory install-hooks --agent &lt;agente&gt; --apply</code>.</p></div></details>
-            <details class="faq-item"><summary><span class="faq-no">08</span><span class="faq-q">Excluí uma memória por engano.</span><span class="faq-icon" aria-hidden="true"></span></summary><div class="faq-a"><p>No portal há 6 segundos para desfazer. Depois disso, toda exclusão deixa um checkpoint git na wiki.</p><p>Liste com <code>ai-memory checkpoints</code> e recupere com <code>ai-memory restore-page --path &lt;caminho&gt; --from &lt;rev&gt;</code>.</p></div></details>
+            <details class="faq-item"><summary><span class="faq-no">08</span><span class="faq-q">O indicador diz que há atualização.</span><span class="faq-icon" aria-hidden="true"></span></summary><div class="faq-a"><p>O portal lê a versão do servidor local e compara com a última release de <a href="https://github.com/akitaonrails/ai-memory/releases">akitaonrails/ai-memory</a>. Isso acontece ao abrir e de novo quando você clica em <strong>Servidor conectado</strong>.</p><p>A interface não atualiza o binário. Para trocar a versão, use o instalador do ai-memory e reinicie o LaunchAgent.</p></div></details>
+            <details class="faq-item"><summary><span class="faq-no">09</span><span class="faq-q">Excluí uma memória por engano.</span><span class="faq-icon" aria-hidden="true"></span></summary><div class="faq-a"><p>No portal há 6 segundos para desfazer. Depois disso, toda exclusão deixa um checkpoint git na wiki.</p><p>Liste com <code>ai-memory checkpoints</code> e recupere com <code>ai-memory restore-page --path &lt;caminho&gt; --from &lt;rev&gt;</code>.</p></div></details>
           </div>
         </section>
       </div>

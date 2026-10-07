@@ -42,6 +42,7 @@ code{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace}
 .nav-indicator{position:absolute;left:0;bottom:7px;height:2px;width:0;border-radius:2px;background:var(--ink);opacity:0;pointer-events:none}
 .nav-indicator.ready{transition:transform .5s var(--ease-out),width .5s var(--ease-out),opacity .3s}
 .connection.online:before{animation:pulse 1.6s var(--ease) 2}
+.connection.update:before{animation:none}
 .refresh{display:grid;place-items:center;transition:background .2s,transform .3s var(--ease)}
 .refresh:active{transform:scale(.9)}
 .refresh:disabled{animation:spin .9s linear infinite;cursor:progress}
@@ -124,6 +125,7 @@ html:not(.js) .tabs button[aria-current="true"],html:not(.js) .tabs button[aria-
 .library-list{border-top:1px solid var(--hair)}
 .library-list .row-wrap:last-child{border-radius:0 0 28px 28px}
 .pill.live{background:rgba(52,199,89,.14);color:#1d7d3a}
+.pill.warn{background:rgba(182,68,0,.12);color:var(--ember)}
 .row-wrap{position:relative;display:flex;align-items:center;transition:background .25s var(--ease)}
 .row-wrap+.row-wrap{box-shadow:inset 0 1px 0 rgba(0,0,0,.05)}
 .row-wrap:hover{background:color-mix(in srgb,var(--wash) 80%,transparent)}
@@ -229,14 +231,14 @@ main{flex:1 0 auto}
 footer{flex-shrink:0}
 
 /* ---------- Seletor de projetos + recentes + salvar sessão ---------- */
-.project-strip{display:flex;align-items:center;gap:14px;margin:0 0 16px}
+.project-strip{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin:0 0 16px;min-width:0}
 #save-session{flex-shrink:0;margin-left:auto}
 .plogo{flex-shrink:0;display:grid;place-items:center;width:28px;height:28px;border-radius:8px;object-fit:cover;background:var(--paper);box-shadow:0 0 0 1px rgba(0,0,0,.07);font-size:11px;font-weight:700;line-height:1;letter-spacing:.02em}
 .plogo.mono{background:hsl(var(--h,210) 70% 92%);color:hsl(var(--h,210) 45% 30%);box-shadow:inset 0 0 0 1px hsl(var(--h,210) 40% 84%)}
 .plogo-stack{display:inline-flex;flex-shrink:0}
 .plogo-stack .plogo{width:24px;height:24px;border-radius:7px;box-shadow:0 0 0 2px var(--canvas);font-size:9px}
 .plogo-stack .plogo+.plogo{margin-left:-9px}
-.switcher{position:relative;min-width:0}
+.switcher{position:relative;flex:1 1 220px;min-width:0}
 .switcher-button{display:flex;align-items:center;gap:10px;max-width:100%;height:var(--control);padding:0 12px 0 6px;border:0;border-radius:999px;background:var(--canvas);color:var(--ink);font-size:14px;letter-spacing:-.016em;transition:background .25s var(--ease),box-shadow .25s var(--ease),transform .2s var(--ease)}
 .switcher-button:hover{background:var(--wash)}
 .switcher-button:active{transform:scale(.97)}
@@ -266,8 +268,8 @@ footer{flex-shrink:0}
 .switcher-empty{margin:0;padding:28px 16px;color:var(--muted);font-size:14px;text-align:center}
 .switcher-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid var(--hair);color:var(--muted);font-size:12px}
 .switcher-foot kbd{margin:0 1px;padding:1px 5px;font-size:11px}
-.recent{display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden}
-.recent-label{margin:0 4px 0 2px;color:var(--muted);font-size:12px;letter-spacing:-.01em}
+.recent{display:flex;align-items:center;gap:8px;flex:0 0 auto;padding:6px 2px;margin:-6px 0;overflow:visible}
+.recent-label{flex-shrink:0;margin:0 4px 0 2px;color:var(--muted);font-size:12px;letter-spacing:-.01em}
 .recent-item{flex-shrink:0;padding:0;border:0;border-radius:10px;background:none;transition:transform .35s var(--spring)}
 .recent-item .plogo{width:32px;height:32px;border-radius:10px;transition:box-shadow .25s var(--ease)}
 .recent-item:hover{transform:translateY(-2px)}
@@ -277,7 +279,7 @@ footer{flex-shrink:0}
 @media(max-width:660px){.project-strip{flex-wrap:wrap;gap:10px}.switcher{flex:1 1 100%}.switcher-button{width:100%}.switcher-button .chevron{margin-left:auto}.recent-label{display:none}.recent-item .plogo{width:30px;height:30px}}
 
 /* ---------- Folha "salvar sessão": opções, rádio e switch ---------- */
-.sheet{width:min(560px,calc(100% - 32px));padding:32px 32px 28px}
+.sheet{width:min(560px,calc(100% - 32px));max-height:min(88vh,860px);overflow:auto;padding:32px 32px 28px}
 .sheet h2{margin:14px 0 8px;font-size:28px;line-height:1.14;letter-spacing:.007em}
 .sheet-lead{margin:0 0 22px;color:var(--muted);font-size:14px;line-height:1.43;letter-spacing:-.016em}
 .sheet code{padding:2px 5px;border-radius:5px;background:var(--wash);font-size:.9em}
@@ -286,6 +288,22 @@ footer{flex-shrink:0}
 .sheet .all-clear{margin-top:4px;background:var(--canvas)}
 .sheet .all-clear span{overflow-wrap:anywhere}
 .sheet .form-error{margin-top:4px}
+.field{display:grid;gap:6px;margin:0 0 14px}
+.field span{font-size:13px;letter-spacing:-.01em;color:var(--muted)}
+.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--paper);color:var(--ink)}
+.field textarea{min-height:88px;resize:vertical;line-height:1.45}
+.field input:focus,.field textarea:focus,.field select:focus{outline:3px solid var(--blue);outline-offset:1px}
+.sheet .switch-row{margin:0 0 18px}
+.finding-list{display:grid;gap:10px;margin-top:18px}
+.finding{display:grid;gap:6px;padding:14px 16px;border-radius:14px;background:var(--canvas)}
+.finding strong{font-size:15px;letter-spacing:-.02em}
+.finding p,.finding-pages{margin:0;color:var(--deep);font-size:14px}
+.feedback{display:grid;gap:10px;margin-top:28px;padding-top:18px;border-top:1px solid var(--hair)}
+.feedback>span{font-size:13px;color:var(--muted)}
+.feedback-actions{display:flex;flex-wrap:wrap;gap:8px}
+.feedback-why{display:flex;gap:8px}
+.feedback-why[hidden]{display:none}
+.feedback-why input{flex:1;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
 .choices{display:grid;gap:8px}
 .choice{position:relative;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:var(--canvas);box-shadow:inset 0 0 0 1.5px transparent;cursor:pointer;transition:background .2s var(--ease),box-shadow .2s var(--ease)}
 .choice:hover{background:var(--wash)}
@@ -466,6 +484,19 @@ dialog::-webkit-scrollbar-track{margin:22px 0}
 #reader-body pre::-webkit-scrollbar-thumb,.note pre::-webkit-scrollbar-thumb{border-width:4px;background-color:rgba(0,0,0,.18)}
 .terminal ::-webkit-scrollbar-thumb,.note pre::-webkit-scrollbar-thumb{background-color:rgba(255,255,255,.22)}
 @supports not selector(::-webkit-scrollbar){html{scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.3) transparent}dialog,.switcher-list{scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.2) transparent}}
+
+/* ---------- Leitor: resumo da sessão e arquivos gravados ---------- */
+.session-callout{margin:0 0 22px;padding:16px 18px;border-radius:16px;background:#fff6e8;color:var(--ink)}
+.session-callout strong{display:block;margin-bottom:4px;letter-spacing:-.02em}
+.session-callout p{margin:0;color:var(--deep);font-size:15px;line-height:1.45}
+.session-files{margin:0 0 22px}
+.session-files h3{margin:0 0 10px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.session-aside{margin:8px 0 0;font-size:13px}
+#reader-body .file-hit{margin:0 0 8px;border:1px solid var(--line);border-radius:14px;background:var(--canvas)}
+#reader-body .file-hit summary{margin:0;padding:12px 14px}
+#reader-body .file-hit .file-name{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;font-size:13px}
+#reader-body .file-hit pre{margin:0 14px 14px}
+#reader-body .event-dump{margin-top:8px}
 
 /* ---------- Leitor: eventos da sessão ---------- */
 #reader-body details{padding:0;border-top:1px solid var(--hair)}
