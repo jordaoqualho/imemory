@@ -13,6 +13,27 @@
 !web-ui/
 !web-ui/**
 
-# Project logos map real local projects. Keep them on this machine.
-web-ui/logos/
-web-ui/logos/**
+# Generated copies of local project logos stay on this machine.
+# Marks authored for projects without a favicon live in overrides/.
+web-ui/logos/*
+!web-ui/logos/overrides/
+!web-ui/logos/overrides/**
+
+# Logo sync script. It reads the local database and does not store it.
+!tools/
+!tools/**
+
+# Personal data. These rules win over any allow above.
+/wiki/
+/db/
+/hooks/
+/hook-spool/
+/logs/
+/voice/
+/backups/
+/_pending/
+/config.toml
+*.sqlite
+*.sqlite-*
+.env
+.env.*
